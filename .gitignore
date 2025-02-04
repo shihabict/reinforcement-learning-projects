@@ -4,3 +4,7 @@ rlenv/
 
 *.pdf
 test.cpp
+test.py
+*.png
+*.pkl
+
