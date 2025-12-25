@@ -8,4 +8,5 @@ test.cpp
 test.py
 *.png
 *.pkl
-
+*.zip
+logs_lka/
