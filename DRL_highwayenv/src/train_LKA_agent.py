@@ -34,5 +34,5 @@ model = SAC(
     gradient_steps=1,
 )
 
-model.learn(total_timesteps=100_000, callback=callback)
+model.learn(total_timesteps=300_000, callback=callback)
 model.save("sac_lane_keeping")

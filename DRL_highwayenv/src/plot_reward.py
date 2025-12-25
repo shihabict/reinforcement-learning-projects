@@ -11,5 +11,6 @@ plt.xlabel("Timesteps")
 plt.ylabel("Episode Reward")
 plt.title("Episode Reward During Training")
 plt.grid(True)
-plt.show()
 plt.savefig(f"{log_dir}/reward_vs_episod.png")
+plt.show()
+

@@ -42,8 +42,8 @@ class LaneKeepingEnv(AbstractEnv):
             "duration": 20,            # seconds
 
             # Road setup
-            "lanes_count": 2,
-            "speed_limit": 25,         # m/s
+            "lanes_count": 1,
+            "speed_limit": 20,         # m/s
             "road_length": 400,        # meters
 
             # Ego init
