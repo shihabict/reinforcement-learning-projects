@@ -1,5 +1,4 @@
 import numpy as np
-import highway_env  # ensures rendering deps are loaded (and env utilities)
 
 from DRL_highwayenv.src.custom_LKA_env import LaneKeepingEnv
 
