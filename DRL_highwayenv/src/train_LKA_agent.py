@@ -2,9 +2,7 @@ from stable_baselines3 import SAC
 import os
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.env_util import make_vec_env
-import matplotlib.pyplot as plt
-from stable_baselines3.common.results_plotter import plot_results
-from stable_baselines3.common import results_plotter
+
 from DRL_highwayenv.src.custom_LKA_env import LaneKeepingEnv
 from DRL_highwayenv.src.episod_callback import EpisodeRewardCSVCallback
 
@@ -33,6 +31,6 @@ model = SAC(
     train_freq=1,
     gradient_steps=1,
 )
-
-model.learn(total_timesteps=300_000, callback=callback)
-model.save("sac_lane_keeping")
+training_timesteps = 500_000
+model.learn(total_timesteps=training_timesteps, callback=callback)
+model.save(f"sac_lane_keeping_{training_timesteps}")

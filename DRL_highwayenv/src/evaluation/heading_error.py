@@ -172,9 +172,9 @@ def plot_episode(t, lat, head, speed, metrics, log_dir, lateral_eps=0.10, title_
 
 
 if __name__ == "__main__":
-    log_dir = '../logs_lka/'
+    log_dir = '../logs_lka_50/'
     # Load your trained model
-    model = SAC.load("../sac_lane_keeping")
+    model = SAC.load("../sac_lane_keeping_500000")
 
     # Run one rendered episode and plot signals
     t, lat, head, speed, rewards, metrics = run_one_episode(
