@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 log_dir = "./logs_lka"
 
-df = pd.read_csv(f"{log_dir}/lka_rewards.csv")
+df = pd.read_csv(f"runs_lka/run_005/logs/lka_rewards.csv")
 
 plt.figure()
 plt.plot(df["timesteps"], df["episode_reward"])

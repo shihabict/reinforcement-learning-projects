@@ -20,9 +20,9 @@ class LaneKeepingEnv(AbstractEnv):
             # Observation (start simple)
             "observation": {
                 "type": "Kinematics",
-                "vehicles_count": 1,
+                "vehicles_count": 5,
                 "features": ["presence", "x", "y", "vx", "vy", "cos_h", "sin_h"],
-                "absolute": True,
+                "absolute": False,     # IMPORTANT: relative to ego makes it traffic-aware & easier to learn
                 "order": "sorted",
                 "flatten": True,
             },
@@ -31,10 +31,21 @@ class LaneKeepingEnv(AbstractEnv):
             "action": {
                 "type": "ContinuousAction",
                 "lateral": True,
-                "longitudinal": False,
+                "longitudinal": True,
                 "steering_range": [-np.pi/6, np.pi/6],
                 "dynamical": True,
             },
+
+            # vehicles set up
+            # "vehicles_count": 5,  # ego + 4 nearest vehicles in observation
+            "initial_vehicle_count": 20,  # number of traffic vehicles at reset
+            "spawn_probability": 0.15,  # chance to spawn per step
+            "other_vehicles_type": "highway_env.vehicle.behavior.IDMVehicle",
+            "min_gap": 4.0,  # do not spawn too close to ego
+            "traffic_speed_mean": 15.0,
+            "traffic_speed_std": 2.0,
+            "enable_spawning": True,
+            "enable_clearing": True,
 
             # Timing
             "simulation_frequency": 15,
@@ -52,8 +63,8 @@ class LaneKeepingEnv(AbstractEnv):
             "initial_longitudinal": 50,
 
             # Rewards (weights)
-            "collision_reward": -5.0,
-            "offroad_reward": -5.0,
+            "collision_reward": -20.0,
+            "offroad_reward": -20.0,
             "lane_center_reward": 1.0,
             "heading_reward": 0.5,
             "smooth_steer_reward": 0.05,  # penalize big steering
@@ -87,6 +98,28 @@ class LaneKeepingEnv(AbstractEnv):
 
         self.road = Road(network=net, np_random=self.np_random, record_history=False)
 
+    def _spawn_vehicle(self, vehicle_type):
+        lane_id = self.np_random.integers(0, self.config["lanes_count"])
+        lane = self.road.network.get_lane(("a", "b", int(lane_id)))
+
+        # random longitudinal position along road
+        s = float(self.np_random.uniform(0, self.config["road_length"]))
+        speed = float(self.np_random.normal(self.config["traffic_speed_mean"],
+                                            self.config["traffic_speed_std"]))
+
+        # create vehicle
+        veh = vehicle_type.make_on_lane(self.road, ("a", "b", int(lane_id)),
+                                        longitudinal=s, speed=speed)
+
+        # avoid spawning too close to ego or other cars
+        for v in self.road.vehicles:
+            if np.linalg.norm(v.position - veh.position) < self.config["min_gap"]:
+                return None
+
+        veh.randomize_behavior()
+        self.road.vehicles.append(veh)
+        return veh
+
     def _make_vehicles(self) -> None:
         self.controlled_vehicles = []
 
@@ -100,8 +133,19 @@ class LaneKeepingEnv(AbstractEnv):
             speed=self.config["initial_speed"],
             heading=ego_lane.heading_at(self.config["initial_longitudinal"]),
         )
+
+        #spawn traffic
+
         self.road.vehicles.append(ego_vehicle)
         self.controlled_vehicles.append(ego_vehicle)
+
+        vehicle_type = utils.class_from_path(self.config["other_vehicles_type"])
+
+        for _ in range(self.config["initial_vehicle_count"]):
+            self._spawn_vehicle(vehicle_type)
+
+
+
 
     def _reward(self, action) -> float:
         v = self.vehicle
