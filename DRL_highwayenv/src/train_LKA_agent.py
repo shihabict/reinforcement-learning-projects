@@ -3,8 +3,9 @@ import os
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.env_util import make_vec_env
 
-from DRL_highwayenv.src.custom_LKA_env import LaneKeepingEnv
+# from DRL_highwayenv.src.custom_LKA_env import LaneKeepingEnv
 from DRL_highwayenv.src.episod_callback import EpisodeRewardCSVCallback
+from DRL_highwayenv.src.traffic_aware_environment import LaneKeepingEnv
 from DRL_highwayenv.src.utils import get_next_run_dir
 
 # log_dir = "./logs_lka"

@@ -1,6 +1,8 @@
 import numpy as np
 
-from DRL_highwayenv.src.custom_LKA_env import LaneKeepingEnv
+from DRL_highwayenv.src.traffic_aware_environment import LaneKeepingEnv
+
+# from DRL_highwayenv.src.custom_LKA_env import LaneKeepingEnv
 
 # assume LaneKeepingEnv is already defined in the notebook or imported
 env = LaneKeepingEnv(render_mode="human")   # or render_mode="rgb_array"

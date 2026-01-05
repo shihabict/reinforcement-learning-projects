@@ -2,7 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from stable_baselines3 import SAC
 from highway_env import utils  # wrap_to_pi
-from DRL_highwayenv.src.custom_LKA_env import LaneKeepingEnv
+
+from DRL_highwayenv.src.traffic_aware_environment import LaneKeepingEnv
+
+
+# from DRL_highwayenv.src.custom_LKA_env import LaneKeepingEnv
 
 
 def compute_lateral_offset(env) -> float:
@@ -171,16 +175,16 @@ def plot_episode(t, lat, head, speed, metrics, log_dir, lateral_eps=0.10, title_
 
 
 if __name__ == "__main__":
-    log_dir = '../logs_lka_50/'
+    log_dir = '../runs_lka/run_007/logs'
     # Load your trained model
-    model = SAC.load("../sac_lane_keeping_500000")
+    model = SAC.load("../runs_lka/run_007/models/sac_lane_keeping_steps_300000_run_007.zip")
 
     # Run one rendered episode and plot signals
     t, lat, head, speed, rewards, metrics = run_one_episode(
         model,
         render=True,            # show simulation
-        duration=20,
-        policy_frequency=5,
+        duration=30,
+        policy_frequency=50,
         start_longitudinal=40.0,
         start_lateral=-0.6,     # your requested disturbance
         lateral_eps=0.10        # settling threshold (adjust if needed)
