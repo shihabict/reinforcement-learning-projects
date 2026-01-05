@@ -15,7 +15,7 @@ print(f"Saving this run to: {run_dir}")
 def make_env():
     env = LaneKeepingEnv(render_mode=None)
     # Optional: tweak config quickly
-    env.configure({"duration": 20, "policy_frequency": 5})
+    env.configure({"duration": 30, "policy_frequency": 50})
     return Monitor(env, log_dir)
 
 
