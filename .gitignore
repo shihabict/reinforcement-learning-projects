@@ -10,3 +10,4 @@ test.py
 *.pkl
 *.zip
 logs_lka/
+*.csv
