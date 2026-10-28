@@ -14,6 +14,9 @@ class TagGame:
         self.tagger_pos = None
         self.runner_pos = None
 
+    def seed(self, seed):
+        self.rng = np.random.default_rng(seed)
+
     def reset(self):
         # place tagger and runner at random positions
         while True:
@@ -24,7 +27,7 @@ class TagGame:
 
     def _move(self, pos, action):
         # return the new position after applying the action
-        new_pos = pos + np.array(self.MOVES[action])
+        new_pos = pos + np.array(self.MOVES[int(action)])
         new_pos = np.clip(new_pos, 0, self.grid_size - 1) # ensure the new position stays within the grid boundaries
         return new_pos
 

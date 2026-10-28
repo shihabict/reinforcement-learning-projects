@@ -1,0 +1,1 @@
+from marl_tag.game import TagGame

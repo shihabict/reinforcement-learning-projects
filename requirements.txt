@@ -1,5 +1,6 @@
 gymnasium>=1.0.0
 swig>=4.3.0
+stable-baselines3
 matplotlib
 numpy
 seaborn
