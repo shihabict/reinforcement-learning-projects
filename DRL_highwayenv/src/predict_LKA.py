@@ -79,7 +79,7 @@ env.configure({
     "road_length": 600
 })
 
-model = SAC.load("runs_lka/run_008/models/sac_lane_keeping_steps_300000_run_008.zip")
+model = SAC.load("runs_lka/run_007/models/sac_lane_keeping_steps_300000_run_007.zip")
 
 N_EPISODES = 5  # set to 50 if you want, plotting 50 episodes may be heavy
 
