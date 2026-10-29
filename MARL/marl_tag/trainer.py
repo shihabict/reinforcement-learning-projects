@@ -1,8 +1,28 @@
 import os
+import json
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.callbacks import BaseCallback
+from plot_reward import plot_history
 from env import TagEnv
-from utils import pick_device
+from utils import pick_device, set_seed
+
+
+
+class EpisodeLogger(BaseCallback):
+    """Collects the reward and length of every finished episode."""
+    def __init__(self):
+        super().__init__()
+        self.rewards = []
+        self.lengths = []
+
+    def _on_step(self):
+        for info in self.locals["infos"]:      # one info per parallel env
+            if "episode" in info:              # present only when an episode just ended
+                self.rewards.append(info["episode"]["r"])
+                self.lengths.append(info["episode"]["l"])
+        return True   
+
 
 class SelfPlayTrainer:
     def __init__(self, grid_size=8, max_steps=64, n_envs=8, n_steps=128, model_dir="models", device=None):
@@ -15,6 +35,16 @@ class SelfPlayTrainer:
         os.makedirs(self.model_dir, exist_ok=True)
         
         self.models = {"tagger": None, "runner": None}
+        self.history = {
+            "tagger": {
+                "rewards": [],
+                "lengths": []
+            },
+            "runner": {
+                "rewards": [],
+                "lengths": []
+            }
+        }
         
     
     def _make_env(self, role):
@@ -28,10 +58,12 @@ class SelfPlayTrainer:
     def _train_role(self, role, timesteps):
         opponent_role = "runner" if role == "tagger" else "tagger"
         env = self._make_env(role)
+        logger = EpisodeLogger()
 
         # Give the frozen opponent to every env (None means random in TagEnv)
         if self.models[opponent_role] is not None:
             env.env_method("set_opponent", self.models[opponent_role])
+            
 
         if self.models[role] is None:
             self.models[role] = PPO("MlpPolicy", env, n_steps=self.n_steps,
@@ -39,7 +71,14 @@ class SelfPlayTrainer:
         else:
             self.models[role].set_env(env)
 
-        self.models[role].learn(total_timesteps=timesteps, reset_num_timesteps=False)
+        print(env.get_attr("opponent"))
+
+        self.models[role].learn(total_timesteps=timesteps, reset_num_timesteps=False, callback=logger)
+
+        self.history[role]["rewards"].extend(logger.rewards)
+        self.history[role]["lengths"].extend(logger.lengths)
+
+        
         env.close()
         
     def train(self, timesteps_per_role=10000, n_iterations=10):
@@ -48,11 +87,18 @@ class SelfPlayTrainer:
             for role in ["tagger", "runner"]:
                 print(f"Training role: {role}")
                 self._train_role(role, timesteps_per_role)
+        self.save()
+    
     
     def save(self):
         os.makedirs(self.model_dir, exist_ok=True)
         for role, model in self.models.items():
             model.save(os.path.join(self.model_dir, role))
+
+        with open(os.path.join(self.model_dir, "history.json"), "w") as f:
+            json.dump(self.history, f)
+
+
             
     def load_models(self):
         for role in ["tagger", "runner"]:
@@ -66,12 +112,8 @@ class SelfPlayTrainer:
     
     
 if __name__ == "__main__":
-    t = SelfPlayTrainer(n_envs=2, n_steps=64)
-    t.train(timesteps_per_role=128, n_iterations=10)
-    
-    print(t.models["tagger"].num_timesteps) 
+    set_seed(0)
+    trainer = SelfPlayTrainer(grid_size=8, max_steps=64, n_envs=8, n_steps=128)
+    trainer.train(timesteps_per_role=2048, n_iterations=5)
 
-    assert t.models["tagger"] is not None and t.models["runner"] is not None
-    print(t.models["tagger"].num_timesteps)   # should be > 128, since the counter accumulates
-    t.save(); t.load_models()
-    print("trainer OK")
+    plot_history(trainer.history, output_path="figures")
