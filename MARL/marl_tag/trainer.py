@@ -114,6 +114,6 @@ class SelfPlayTrainer:
 if __name__ == "__main__":
     set_seed(0)
     trainer = SelfPlayTrainer(grid_size=8, max_steps=64, n_envs=8, n_steps=128)
-    trainer.train(timesteps_per_role=2048, n_iterations=5)
+    trainer.train(timesteps_per_role=20000, n_iterations=15)
 
     plot_history(trainer.history, output_path="figures")
